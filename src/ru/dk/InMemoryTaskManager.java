@@ -124,27 +124,25 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateEpicStatus(Epic epic){
-                boolean isAllSubtasksDone = epic.getSubtasks()
-                                                .stream()
-                                                .anyMatch(subtask -> subtask.getStatus().equals(Status.NEW)
-                                                        || subtask.getStatus().equals(Status.IN_PROGRESS));
-                if (epic.getSubtasks().isEmpty() && epic.getStatus() != Status.NEW){
-                    epic.setStatus(Status.NEW);
-                } else if (!isAllSubtasksDone){
-                    epic.setStatus(Status.DONE);
-                } else {
-                    epic.setStatus(Status.IN_PROGRESS);
-                }
-    }
-
-    @Override
-    public int generateId(){
-        return id++;
-    }
-
-    @Override
     public ArrayList<Task> getHistory(){
         return (ArrayList<Task>) historyManager.getHistory();
+    }
+
+    private void updateEpicStatus(Epic epic){
+        boolean isAllSubtasksDone = epic.getSubtasks()
+                .stream()
+                .anyMatch(subtask -> subtask.getStatus().equals(Status.NEW)
+                        || subtask.getStatus().equals(Status.IN_PROGRESS));
+        if (epic.getSubtasks().isEmpty() && epic.getStatus() != Status.NEW){
+            epic.setStatus(Status.NEW);
+        } else if (!isAllSubtasksDone){
+            epic.setStatus(Status.DONE);
+        } else {
+            epic.setStatus(Status.IN_PROGRESS);
+        }
+    }
+
+    private int generateId(){
+        return id++;
     }
 }
