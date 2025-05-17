@@ -128,7 +128,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Task> getHistory(){
-        return (ArrayList<Task>) historyManager.getHistoryList();
+        return (ArrayList<Task>) historyManager.getHistory();
     }
 
     private void updateEpicStatus(Epic epic){

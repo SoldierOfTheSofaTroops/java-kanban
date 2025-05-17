@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,6 +16,7 @@ class InMemoryHistoryManagerTest {
     @BeforeEach
     void setUpBeforeClass() throws Exception {
         inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefault();
+        historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
     }
 
     @Test
@@ -34,22 +36,25 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void getHistory() {
-        assertNotNull(historyManager.getHistoryList(), "History shouldn't be null");
+        assertNotNull(historyManager.getHistory(), "History shouldn't be null");
     }
 
     @Test
-    void innerLinkedListTest(){
-            for (int i = 0; i < 10; i++) {
-                inMemoryTaskManager.createTask(new Task("Description " + i, "Task " + i));
-                inMemoryTaskManager.getTaskById(i);
-            }
+    void linkLast(){
+        Random random = new Random();
 
-        assertEquals(10, inMemoryTaskManager.getHistory().size(), "Incorrect number of tasks");
-        inMemoryTaskManager.deleteTaskById(0);
-        assertEquals(9, inMemoryTaskManager.getHistory().size(),"Result of deleting first node is incorrect");
-        inMemoryTaskManager.deleteTaskById(9);
-        assertEquals(8, inMemoryTaskManager.getHistory().size(),"Result of deleting last node is incorrect");
-        inMemoryTaskManager.deleteTaskById(4);
-        assertEquals(7, inMemoryTaskManager.getHistory().size(),"Result of deleting middle node is incorrect");
+        for (int i = 0; i < 10000; i++) {
+            Task task = new Task("Task " + i + " description", "Task "+i);
+            inMemoryTaskManager.createTask(task);
+        }
+        for (int n = 0; n < 10000; n++) {
+            inMemoryTaskManager.getTaskById(random.nextInt(10000));
+        }
+
+        ArrayList<Task> history = inMemoryTaskManager.getHistory();
+
+        for (Task task : history) {
+            assertNotEquals(2, history.stream().filter(t -> t.getId() == task.getId()).count());
+        }
     }
 }

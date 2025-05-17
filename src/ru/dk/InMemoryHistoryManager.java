@@ -3,95 +3,86 @@ package ru.dk;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager{
-    private final InnerLinkedList<Task> historyList = new InnerLinkedList<>();
-    private final Map<Integer, InnerLinkedList.Node<Task>> historyHashMap = new HashMap<>();
+    private final Map<Integer, Node<Task>> history = new HashMap<>();
+    private Node<Task> head;
+    private Node<Task> tail;
 
     @Override
     public void add(Task task) {
-        if (historyHashMap.containsKey(task.getId())) {
-            historyList.removeNode(historyHashMap.get(task.getId()));
-            historyHashMap.remove(task.getId());
-        }
         Task taskShallowCopy = task.clone();
-        historyList.linkLast(taskShallowCopy);
-        historyHashMap.put(task.getId(), historyList.getTail());
+        if (history.isEmpty()) {
+            linkFirst(new Node<>(null, taskShallowCopy, null));
+            } else
+                linkLast(new Node<>(null, taskShallowCopy, null));
+    }
+
+    public void linkLast(Node<Task> node) {
+        if (history.containsKey(node.getData().getId())) {
+            removeNode(node);
+            if (history.isEmpty()){
+                linkFirst(node);
+            } else checkTailAndLink(node);
+        } else checkTailAndLink(node);
+    }
+
+    public void removeNode(Node<Task> node) {
+        if (head.getData().getId() == node.getData().getId()){
+            if (head.getNext() != null){
+                head = head.getNext();
+                history.remove(node.getData().getId());
+            } else {
+                history.remove(node.getData().getId());
+                head = null;
+            }
+        } else if(tail.getData().getId() == node.getData().getId()) {
+            tail = tail.getPrev();
+            history.remove(node.getData().getId());
+        }else {
+            Node<Task> removableNode = history.get(node.getData().getId());
+            Node<Task> prevNode = removableNode.getPrev();
+            Node<Task> nextNode = removableNode.getNext();
+            prevNode.setNext(nextNode);
+            nextNode.setPrev(prevNode);
+        }
     }
 
     @Override
-    public List<Task> getHistoryList() {
-        return new ArrayList<>(historyList.getTasks());
+    public List<Task> getHistory() {
+        return getTasks();
     }
 
     @Override
     public void remove(int id) {
-        if (historyHashMap.containsKey(id)) {
-            historyList.removeNode(historyHashMap.get(id));
-        }
-        historyHashMap.remove(id);
+        Node<Task> removableNode  = history.get(id);
+        removeNode(removableNode);
     }
 
-    private static class InnerLinkedList<T extends Task> {
-
-        private Node<T> head;
-        private Node<T> tail;
-        private int size = 0;
-
-        public void linkLast(T t) {
-            final Node<T> oldTail = tail;
-            final Node<T> newTask = new Node<>(oldTail, t, null);
-            tail = newTask;
-            if (oldTail == null) head = newTask;
-            else oldTail.next = newTask;
-            size++;
+    public ArrayList<Task> getTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        Node<Task> node = head;
+        while (node != null) {
+            tasks.add(node.getData());
+            node = node.getNext();
         }
-
-        public Node<T> getTail() {
-            return tail;
-        }
-
-        public ArrayList<Task> getTasks() {
-            ArrayList<Task> tasks = new ArrayList<>();
-            if (head != null) {
-                Node<T> node = head;
-                while (node != null) {
-                    tasks.add(node.data);
-                    node = node.next;
-                }
-            }
-            return tasks;
-        }
-
-        public void removeNode(Node<T> node) {
-            if (node.prev == null && node.next == null) {
-                head = tail = null;
-                size--;
-            } else if (node.prev != null && node.next == null) {
-                node.prev.next = null;
-                tail = node.prev;
-                size--;
-            } else if (node.prev == null) {
-                node.next.prev = null;
-                head = node.next;
-                size--;
-            } else {
-                node.prev.next = node.next;
-                node.next.prev = node.prev;
-                size--;
-            }
-
-        }
-
-       private static class Node<T extends Task> {
-            public T data;
-            public Node<T> prev;
-            public Node<T> next;
-
-            public Node(Node<T> prev, T data, Node<T> next) {
-                this.data = data;
-                this.next = next;
-                this.prev = prev;
-            }
-        }
+        return tasks;
     }
 
-}
+    private void linkFirst(Node<Task> firstNode) {
+        head = firstNode;
+        history.put(firstNode.getData().getId(), firstNode);
+    }
+
+    private void checkTailAndLink(Node<Task> node){
+        if (tail == null){
+            tail = node;
+            tail.setPrev(head);
+            head.setNext(node);
+            history.put(node.getData().getId(), node);
+        } else {
+            history.put(node.getData().getId(), node);
+            tail.setNext(node);
+            node.setPrev(tail);
+            tail = node;
+        }
+    }
+    }
