@@ -2,7 +2,7 @@ package ru.dk;
 
 import java.util.Objects;
 
-public class Task {
+public class Task implements Cloneable {
     private int id;
     private String description;
     private String name;
@@ -65,6 +65,15 @@ public class Task {
                 + "\tName: " + this.name + "\n"
                 + "\tDescription: " + this.description + "\n"
                 + "\tStatus: " + this.status + "\n";
+    }
+
+    @Override
+    public Task clone() {
+        try {
+            return (Task) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
 

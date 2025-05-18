@@ -24,6 +24,5 @@ public class Subtask extends Task{
                         + "\tDescription: " + this.getDescription() + "\n"
                         + "\tStatus: " + this.getStatus() + "\n"
                         + "\tEpic: " + this.epic.getName() + "\n";
-
     }
 }
