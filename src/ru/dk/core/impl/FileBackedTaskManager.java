@@ -1,8 +1,14 @@
-package ru.dk;
+package ru.dk.core;
 
+import ru.dk.abstracts.TaskManager;
+import ru.dk.entity.Epic;
+import ru.dk.entity.Subtask;
+import ru.dk.entity.Task;
+
+import java.io.File;
 import java.util.ArrayList;
 
-public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager{
+public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
     @Override
     public void createTask(Task task) {
 
@@ -107,5 +113,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
     }
 
+    public String toString(Task task){
+        return null;
+    }
+
+    public Task fromString(String value){
+        return null;
+    }
+
+    static FileBackedTaskManager loadFromFile(File file){
+        return null;
+    }
 
 }

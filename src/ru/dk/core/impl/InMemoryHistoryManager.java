@@ -1,8 +1,12 @@
-package ru.dk;
+package ru.dk.core;
+
+import ru.dk.abstracts.HistoryManager;
+import ru.dk.entity.Node;
+import ru.dk.entity.Task;
 
 import java.util.*;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node<Task>> history = new HashMap<>();
     private Node<Task> head;
     private Node<Task> tail;

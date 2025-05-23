@@ -1,4 +1,11 @@
-package ru.dk;
+package ru.dk.core;
+
+import ru.dk.abstracts.HistoryManager;
+import ru.dk.Status;
+import ru.dk.abstracts.TaskManager;
+import ru.dk.entity.Epic;
+import ru.dk.entity.Subtask;
+import ru.dk.entity.Task;
 
 import java.util.*;
 

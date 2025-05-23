@@ -1,4 +1,4 @@
-package ru.dk;
+package ru.dk.core.types;
 
 public enum TaskTypes {
     TASK,
