@@ -1,4 +1,4 @@
-package ru.dk.core;
+package ru.dk.core.impl;
 
 import ru.dk.abstracts.HistoryManager;
 import ru.dk.entity.Node;

@@ -1,8 +1,9 @@
-package ru.dk.core;
+package ru.dk.core.impl;
 
 import ru.dk.abstracts.HistoryManager;
-import ru.dk.Status;
 import ru.dk.abstracts.TaskManager;
+import ru.dk.core.Managers;
+import ru.dk.core.types.Status;
 import ru.dk.entity.Epic;
 import ru.dk.entity.Subtask;
 import ru.dk.entity.Task;

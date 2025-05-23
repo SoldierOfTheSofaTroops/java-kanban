@@ -1,4 +1,8 @@
-package ru.dk;
+package ru.dk.abstracts;
+
+import ru.dk.entity.Epic;
+import ru.dk.entity.Subtask;
+import ru.dk.entity.Task;
 
 import java.util.ArrayList;
 

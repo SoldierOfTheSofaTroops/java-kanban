@@ -2,6 +2,12 @@ package ru.dk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.dk.abstracts.TaskManager;
+import ru.dk.core.impl.InMemoryTaskManager;
+import ru.dk.core.types.Status;
+import ru.dk.entity.Epic;
+import ru.dk.entity.Subtask;
+import ru.dk.entity.Task;
 
 import java.util.ArrayList;
 

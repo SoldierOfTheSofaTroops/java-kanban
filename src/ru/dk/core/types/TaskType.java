@@ -1,6 +1,6 @@
 package ru.dk.core.types;
 
-public enum TaskTypes {
+public enum TaskType {
     TASK,
     SUBTASK,
     EPIC

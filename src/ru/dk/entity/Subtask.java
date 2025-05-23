@@ -1,4 +1,6 @@
-package ru.dk;
+package ru.dk.entity;
+
+import ru.dk.core.types.TaskType;
 
 public class Subtask extends Task{
 
@@ -6,6 +8,11 @@ public class Subtask extends Task{
 
     public Subtask(String description, String name) {
         super(description, name);
+    }
+
+    public Subtask(String description, String name, TaskType type, Epic epic) {
+        super(description, name, type);
+        this.epic = epic;
     }
 
     public Epic getEpic() {

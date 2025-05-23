@@ -2,6 +2,10 @@ package ru.dk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.dk.core.impl.InMemoryHistoryManager;
+import ru.dk.core.impl.InMemoryTaskManager;
+import ru.dk.core.Managers;
+import ru.dk.entity.Task;
 
 import java.util.ArrayList;
 import java.util.Random;
