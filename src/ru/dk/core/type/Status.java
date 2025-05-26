@@ -1,4 +1,4 @@
-package ru.dk.core.types;
+package ru.dk.core.type;
 
 public enum Status {
     NEW,

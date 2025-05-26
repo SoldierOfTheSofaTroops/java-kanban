@@ -2,70 +2,76 @@ package ru.dk.core.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.dk.core.types.Status;
-import ru.dk.core.types.TaskType;
+import ru.dk.core.type.Status;
+import ru.dk.core.type.TaskType;
 import ru.dk.entity.Epic;
 import ru.dk.entity.Subtask;
 import ru.dk.entity.Task;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest {
     private FileBackedTaskManager fileBackedTaskManager;
+    BufferedReader bufferedReader;
 
     @BeforeEach
-    void setUp() {
-        fileBackedTaskManager = new FileBackedTaskManager();
+    void setUp() throws IOException {
+        File backup = new File("./src/ru/dk/resources/file/backup.csv");
+        fileBackedTaskManager = FileBackedTaskManager.loadFromFile(backup);
+        FileReader reader = new FileReader(backup);
+        bufferedReader = new BufferedReader(reader);
     }
 
+    /**
+     * This test covered save() and toString() methods in FileBackedTaskManager
+     * **/
     @Test
-    void save() {
+    void save() throws IOException {
+        ArrayList<String> tasks = new ArrayList<>();
+        Task task = new Task(TaskType.TASK, "Task", Status.NEW, "Description task");
+        Epic epic = new Epic(TaskType.EPIC, "Epic", Status.DONE, "Description epic");
+        Subtask subtask = new Subtask(TaskType.SUBTASK, "Subtask", Status.IN_PROGRESS, "Description subtask", epic);
+        fileBackedTaskManager.createTask(task);
+        fileBackedTaskManager.createTask(epic);
+        fileBackedTaskManager.createTask(subtask);
+
+        bufferedReader.readLine();
+
+        while (bufferedReader.ready()){
+            String line = bufferedReader.readLine();
+            tasks.add(line);
+        }
+
+        assertEquals(tasks.getFirst(), "0,TASK,Task,NEW,Description task");
+        assertEquals(tasks.get(1), "1,EPIC,Epic,DONE,Description epic");
+        assertEquals(tasks.getLast(), "2,SUBTASK,Subtask,IN_PROGRESS,Description subtask,1");
+
+        bufferedReader.close();
     }
 
+    /**
+     * This test covered loadFromFile() and fromString() methods in FileBackedTaskManager
+     * **/
     @Test
-    void testToString() {
+    void loadFromFileTest() throws IOException {
+        File testBackup = new File("./test/resources/file/backup.csv");
+        fileBackedTaskManager = FileBackedTaskManager.loadFromFile(testBackup);
 
-        /* Assert for TaskType.TASK & TaskType.EPIC*/
-        Task testTask = new Task("Test task description", "Test task", TaskType.TASK);
-        testTask.setId(0);
-        testTask.setStatus(Status.NEW);
-        assertEquals("0,TASK,Test task,NEW,Test task description", fileBackedTaskManager.toString(testTask));
+        Task testTask = new Task(0,TaskType.TASK, "Task", Status.NEW, "Description task");
+        Epic testEpic = new Epic(1,TaskType.EPIC, "Epic", Status.DONE, "Description epic");
+        Subtask testSubtask = new Subtask(2,TaskType.SUBTASK,
+                                            "Subtask",
+                                            Status.IN_PROGRESS,
+                                            "Description subtask", testEpic);
 
-        /* Assert for TaskType.SUBTASK */
-        Epic testEpic_0 = new Epic("Test epic description",
-                                        "Test epic",
-                                        TaskType.EPIC);
-        testEpic_0.setId(100);
-        testEpic_0.setStatus(Status.NEW);
-        assertEquals("100,EPIC,Test epic,NEW,Test epic description", fileBackedTaskManager.toString(testEpic_0));
-
-        /* Assert for TaskType.SUBTASK */
-        Subtask testSubtask_1_ForEpic_0 = new Subtask("Test subtask_1 description",
-                                                        "Test subtask_1",
-                                                        TaskType.SUBTASK,
-                                                        testEpic_0);
-        Subtask testSubtask_2_ForEpic_0 = new Subtask("Test subtask_2 description",
-                                                        "Test subtask_2",
-                                                        TaskType.SUBTASK,
-                                                        testEpic_0);
-        testSubtask_1_ForEpic_0.setId(1);
-        testSubtask_1_ForEpic_0.setStatus(Status.NEW);
-        testSubtask_2_ForEpic_0.setId(2);
-        testSubtask_2_ForEpic_0.setStatus(Status.DONE);
-        testEpic_0.addSubtask(testSubtask_1_ForEpic_0);
-        testEpic_0.addSubtask(testSubtask_2_ForEpic_0);
-        assertEquals("1,SUBTASK,Test subtask_1,NEW,Test subtask_1 description,100",
-                            fileBackedTaskManager.toString(testSubtask_1_ForEpic_0));
-        assertEquals("2,SUBTASK,Test subtask_2,DONE,Test subtask_2 description,100",
-                            fileBackedTaskManager.toString(testSubtask_2_ForEpic_0));
-    }
-
-    @Test
-    void fromString() {
-
-    }
-
-    @Test
-    void loadFromFile() {
+        assertEquals(fileBackedTaskManager.getTaskById(0),testTask);
+        assertEquals(fileBackedTaskManager.getEpicById(1),testEpic);
+        assertEquals(fileBackedTaskManager.getSubtaskById(2),testSubtask);
     }
 }

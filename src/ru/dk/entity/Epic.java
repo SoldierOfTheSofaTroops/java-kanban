@@ -1,6 +1,7 @@
 package ru.dk.entity;
 
-import ru.dk.core.types.TaskType;
+import ru.dk.core.type.Status;
+import ru.dk.core.type.TaskType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,12 +13,16 @@ public class Epic extends Task{
         super(description, name);
     }
 
-    public Epic(String description, String name, TaskType type) {
-        super(description, name, type);
+    public Epic(TaskType type,String name,Status status,String description) {
+        super(type, name, status, description);
+    }
+
+    public Epic(int id, TaskType type, String name, Status status, String description) {
+        super(id, type, name, status, description);
     }
 
     public ArrayList<Subtask> getSubtasks() {
-        return (ArrayList<Subtask>) subtasks.values();
+        return new ArrayList<>(subtasks.values());
     }
 
     public void addSubtask(Subtask subtask){

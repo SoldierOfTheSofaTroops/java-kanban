@@ -1,7 +1,7 @@
 package ru.dk.entity;
 
-import ru.dk.core.types.Status;
-import ru.dk.core.types.TaskType;
+import ru.dk.core.type.Status;
+import ru.dk.core.type.TaskType;
 
 import java.util.Objects;
 
@@ -19,9 +19,18 @@ public class Task implements Cloneable {
         this.type = TaskType.TASK;
     }
 
-    public Task(String description, String name, TaskType type) {
+    public Task(TaskType type, String name, Status status,String description) {
         this.description = description;
         this.name = name;
+        this.type = type;
+        this.status = status;
+    }
+
+    public Task(int id, TaskType type, String name, Status status, String description) {
+        this.id = id;
+        this.description = description;
+        this.name = name;
+        this.status = status;
         this.type = type;
     }
 
