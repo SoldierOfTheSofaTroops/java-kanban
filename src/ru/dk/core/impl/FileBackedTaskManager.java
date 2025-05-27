@@ -21,6 +21,111 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         linksBetweenSubtasksAndEpics = new HashMap<>();
     }
 
+    /**
+     * This method loads string representation Tasks (Epic, Subtasks) from backup.csv file, then converts them to objects.
+     * After that restores links between Epics and Subtasks.
+     * @throws IOException if errors occur during the reading process from the file
+     * @throws ManagerSaveException if errors occur during the reading process from the file
+     * @see FileBackedTaskManager#fromString(String)
+     * @since Sprint-7
+     * **/
+    public static FileBackedTaskManager loadFromFile(File file) throws IOException {
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager();
+        LinkedHashMap<Integer, Task> tempStorage = new LinkedHashMap<>();
+        FileReader reader = new FileReader(file);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+
+        /* Skip the first line */
+
+        /* Reading file, converting from a String to an object, saving object to tempStorage */
+        try (bufferedReader) {
+            String nextLine;
+            bufferedReader.readLine();
+            while (bufferedReader.ready()) {
+                nextLine = bufferedReader.readLine();
+                Task task = fileBackedTaskManager.fromString(nextLine);
+                tempStorage.put(task.getId(), task);
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException(e.getMessage());
+        }
+
+        /* Restoring links between Epic and Subtasks */
+        linksBetweenSubtasksAndEpics.forEach((subtaskId, epicId) -> {
+            Subtask subtask = (Subtask) tempStorage.get(subtaskId);
+            Epic epic = (Epic) tempStorage.get(epicId);
+            subtask.setEpic(epic);
+            epic.addSubtask(subtask);
+            tempStorage.put(subtaskId, subtask);
+            tempStorage.put(epicId, epic);
+        });
+
+        /* Reading tempStorage and updating objects */
+        for (Task value : tempStorage.values()) {
+            if (value.getType().equals(TaskType.TASK)) {
+                fileBackedTaskManager.updateTask(value);
+            }else if (value.getType().equals(TaskType.EPIC)) {
+                fileBackedTaskManager.updateEpic((Epic) value);
+            } else if (value.getType().equals(TaskType.SUBTASK)) {
+                fileBackedTaskManager.updateSubtask((Subtask) value);
+            }
+        }
+
+        return fileBackedTaskManager;
+    }
+
+    /**
+     * This method save current status of the manager.
+     * It uses toString() method which is in this class
+     * @throws IOException if errors occur during the writing process to the file
+     * @throws ManagerSaveException if errors occur during the writing process to the file
+     * @see FileBackedTaskManager#toString(Task)
+     * @see ManagerSaveException
+     * @since Sprint-7
+     * **/
+    public void save() {
+        BufferedWriter bw;
+        try {
+            bw = new BufferedWriter(new FileWriter(backup));
+            bw.write("id,type,name,status,description,epic\n");
+            if (!getAllTasks().isEmpty()){
+                for (Task task : getAllTasks()) {
+                    try {
+                        bw.write(toString(task));
+                        bw.newLine();
+                    } catch (IOException e) {
+                        throw new ManagerSaveException(e.getMessage());
+                    }
+                }
+            }
+            if (!getAllEpics().isEmpty()){
+                for (Epic epic : getAllEpics()) {
+                    try {
+                        bw.write(toString(epic));
+                        bw.newLine();
+                    } catch (IOException e) {
+                        throw new ManagerSaveException(e.getMessage());
+                    }
+                }
+            }
+
+            if (!getAllSubtasks().isEmpty()){
+                for (Subtask subtask : getAllSubtasks()) {
+                    try {
+                        bw.write(toString(subtask));
+                        bw.newLine();
+                    } catch (IOException e) {
+                        throw new ManagerSaveException(e.getMessage());
+                    }
+                }
+            }
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void createTask(Task task) {
         super.createTask(task);
@@ -134,65 +239,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     /**
-     * This method save current status of the manager.
-     * It uses toString() method which is in this class
-     * @throws IOException if errors occur during the writing process to the file
-     * @throws ManagerSaveException if errors occur during the writing process to the file
-     * @see FileBackedTaskManager#toString(Task)
-     * @see ManagerSaveException
-     * @since Sprint-7
-     * **/
-    public void save() {
-        BufferedWriter bw;
-        try {
-             bw = new BufferedWriter(new FileWriter(backup));
-             bw.write("id,type,name,status,description,epic\n");
-             if (!getAllTasks().isEmpty()){
-                 for (Task task : getAllTasks()) {
-                     try {
-                         bw.write(toString(task));
-                         bw.newLine();
-                     } catch (IOException e) {
-                         throw new ManagerSaveException(e.getMessage());
-                     }
-                 }
-             }
-            if (!getAllEpics().isEmpty()){
-                for (Epic epic : getAllEpics()) {
-                    try {
-                        bw.write(toString(epic));
-                        bw.newLine();
-                    } catch (IOException e) {
-                        throw new ManagerSaveException(e.getMessage());
-                    }
-                }
-            }
-
-            if (!getAllSubtasks().isEmpty()){
-                for (Subtask subtask : getAllSubtasks()) {
-                    try {
-                        bw.write(toString(subtask));
-                        bw.newLine();
-                    } catch (IOException e) {
-                        throw new ManagerSaveException(e.getMessage());
-                    }
-                }
-            }
-            bw.flush();
-            bw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * This method returns string representation of the Task (Epic, Subtask).
      * It's use for save tasks (epics, subtasks) to backup.csv file.
      * @param task Task, Epic or Subtask which needs to be saved
      * @see FileBackedTaskManager#save()
      * @since Sprint-7
      * **/
-    protected String toString(Task task){
+    private String toString(Task task){
         StringBuilder result = new StringBuilder(String.format("%d,%s,%s,%s,%s",
                                                         task.getId(),
                                                         task.getType(),
@@ -215,7 +268,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
      * @throws ClassCastException
      * @since Sprint-7
      * **/
-    public Task fromString(String value) {
+    private Task fromString(String value) {
           String[] parsedString = value.split(",");
           int id = Integer.parseInt(parsedString[0]);
           TaskType type = TaskType.valueOf(parsedString[1]);
@@ -240,56 +293,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
           return restoredObject;
     }
 
-   /**
-    * This method loads string representation Tasks (Epic, Subtasks) from backup.csv file, then converts them to objects.
-    * After that restores links between Epics and Subtasks.
-    * @throws IOException if errors occur during the reading process from the file
-    * @throws ManagerSaveException if errors occur during the reading process from the file
-    * @see FileBackedTaskManager#fromString(String)
-    * @since Sprint-7
-    * **/
-   public static FileBackedTaskManager loadFromFile(File file) throws IOException {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager();
-        LinkedHashMap<Integer, Task> tempStorage = new LinkedHashMap<>();
-        FileReader reader = new FileReader(file);
-        BufferedReader bufferedReader = new BufferedReader(reader);
 
-       /* Skip the first line */
-
-       /* Reading file, converting from a String to an object, saving object to tempStorage */
-       try (bufferedReader) {
-           String nextLine;
-           bufferedReader.readLine();
-           while (bufferedReader.ready()) {
-               nextLine = bufferedReader.readLine();
-               Task task = fileBackedTaskManager.fromString(nextLine);
-               tempStorage.put(task.getId(), task);
-           }
-       } catch (IOException e) {
-           throw new ManagerSaveException(e.getMessage());
-       }
-
-       /* Restoring links between Epic and Subtasks */
-       linksBetweenSubtasksAndEpics.forEach((subtaskId, epicId) -> {
-           Subtask subtask = (Subtask) tempStorage.get(subtaskId);
-           Epic epic = (Epic) tempStorage.get(epicId);
-           subtask.setEpic(epic);
-           epic.addSubtask(subtask);
-           tempStorage.put(subtaskId, subtask);
-           tempStorage.put(epicId, epic);
-       });
-
-        /* Reading tempStorage and updating objects */
-           for (Task value : tempStorage.values()) {
-               if (value.getType().equals(TaskType.TASK)) {
-                   fileBackedTaskManager.updateTask(value);
-               }else if (value.getType().equals(TaskType.EPIC)) {
-                   fileBackedTaskManager.updateEpic((Epic) value);
-               } else if (value.getType().equals(TaskType.SUBTASK)) {
-                   fileBackedTaskManager.updateSubtask((Subtask) value);
-               }
-           }
-
-           return fileBackedTaskManager;
-    }
 }
