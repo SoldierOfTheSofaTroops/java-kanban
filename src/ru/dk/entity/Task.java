@@ -1,4 +1,7 @@
-package ru.dk;
+package ru.dk.entity;
+
+import ru.dk.core.type.Status;
+import ru.dk.core.type.TaskType;
 
 import java.util.Objects;
 
@@ -7,11 +10,28 @@ public class Task implements Cloneable {
     private String description;
     private String name;
     private Status status;
+    private TaskType type;
 
     public Task(String description, String name) {
         this.description = description;
         this.name = name;
         this.status = Status.NEW;
+        this.type = TaskType.TASK;
+    }
+
+    public Task(TaskType type, String name, Status status,String description) {
+        this.description = description;
+        this.name = name;
+        this.type = type;
+        this.status = status;
+    }
+
+    public Task(int id, TaskType type, String name, Status status, String description) {
+        this.id = id;
+        this.description = description;
+        this.name = name;
+        this.status = status;
+        this.type = type;
     }
 
     public int getId() {
@@ -44,6 +64,14 @@ public class Task implements Cloneable {
 
     public void setStatus(Status taskStatus) {
         this.status = taskStatus;
+    }
+
+    public TaskType getType() {
+        return type;
+    }
+
+    public void setType(TaskType type) {
+        this.type = type;
     }
 
     @Override

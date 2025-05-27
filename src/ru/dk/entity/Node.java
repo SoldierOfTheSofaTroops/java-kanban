@@ -1,4 +1,4 @@
-package ru.dk;
+package ru.dk.entity;
 
 public class Node<T extends Task> {
     private T data;

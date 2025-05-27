@@ -1,4 +1,9 @@
-package ru.dk;
+package ru.dk.core;
+
+import ru.dk.abstracts.HistoryManager;
+import ru.dk.abstracts.TaskManager;
+import ru.dk.core.impl.InMemoryHistoryManager;
+import ru.dk.core.impl.InMemoryTaskManager;
 
 public class Managers{
 

@@ -1,4 +1,12 @@
-package ru.dk;
+package ru.dk.core.impl;
+
+import ru.dk.abstracts.HistoryManager;
+import ru.dk.abstracts.TaskManager;
+import ru.dk.core.Managers;
+import ru.dk.core.type.Status;
+import ru.dk.entity.Epic;
+import ru.dk.entity.Subtask;
+import ru.dk.entity.Task;
 
 import java.util.*;
 
@@ -64,7 +72,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(int id){
-        tasks.remove(id);
+        this.tasks.remove(id);
         historyManager.remove(id);
     }
 
@@ -132,18 +140,18 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateEpicStatus(Epic epic){
-        boolean isAllSubtasksDone = epic.getSubtasks()
-                .stream()
-                .anyMatch(subtask -> subtask.getStatus().equals(Status.NEW)
-                        || subtask.getStatus().equals(Status.IN_PROGRESS));
-        if (epic.getSubtasks().isEmpty() && epic.getStatus() != Status.NEW){
-            epic.setStatus(Status.NEW);
-        } else if (!isAllSubtasksDone){
-            epic.setStatus(Status.DONE);
-        } else {
-            epic.setStatus(Status.IN_PROGRESS);
+                boolean isAllSubtasksDone = epic.getSubtasks()
+                        .stream()
+                        .anyMatch(subtask -> subtask.getStatus().equals(Status.NEW)
+                                || subtask.getStatus().equals(Status.IN_PROGRESS));
+                if (epic.getSubtasks().isEmpty() && epic.getStatus() != Status.NEW){
+                    epic.setStatus(Status.NEW);
+                } else if (!isAllSubtasksDone){
+                    epic.setStatus(Status.DONE);
+                } else {
+                    epic.setStatus(Status.IN_PROGRESS);
+            }
         }
-    }
 
     private int generateId(){
         return id++;
