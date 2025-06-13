@@ -240,7 +240,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
     /**
      * This method returns string representation of the Task (Epic, Subtask).
-     * It's use for save tasks (epics, subtasks) to backup.csv file.
+     * It's use for save tasks (epics, subtasks) to back up.csv file.
      * @param task Task, Epic or Subtask which needs to be saved
      * @see FileBackedTaskManager#save()
      * @since Sprint-7

@@ -3,11 +3,13 @@ package ru.dk.entity;
 import ru.dk.core.type.Status;
 import ru.dk.core.type.TaskType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Epic extends Task{
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private LocalDateTime endTime;
 
     public Epic(String description, String name) {
         super(description, name);

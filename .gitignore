@@ -25,3 +25,5 @@ hs_err_pid*
 
 java-kanban.iml
 .github
+/out
+.DS_Store

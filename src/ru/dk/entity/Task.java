@@ -3,6 +3,8 @@ package ru.dk.entity;
 import ru.dk.core.type.Status;
 import ru.dk.core.type.TaskType;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task implements Cloneable {
@@ -11,6 +13,8 @@ public class Task implements Cloneable {
     private String name;
     private Status status;
     private TaskType type;
+    private Duration duration;
+    private LocalDateTime startTime;
 
     public Task(String description, String name) {
         this.description = description;
@@ -72,6 +76,26 @@ public class Task implements Cloneable {
 
     public void setType(TaskType type) {
         this.type = type;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
     }
 
     @Override
