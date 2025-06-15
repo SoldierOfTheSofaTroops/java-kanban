@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,17 +31,27 @@ class FileBackedTaskManagerTest {
     }
 
     /**
-     * This test covered save() and toString() methods in FileBackedTaskManager
+     * This test covers save() and toString() methods in FileBackedTaskManager
      * **/
     @Test
     void save() throws IOException {
         ArrayList<String> tasks = new ArrayList<>();
+
         Task task = new Task(TaskType.TASK, "Task", Status.NEW, "Description task");
-        Epic epic = new Epic(TaskType.EPIC, "Epic", Status.DONE, "Description epic");
+        task.setStartTime(LocalDateTime.of(2025, 6, 15, 0, 0, 0));
+        task.setDuration(Duration.ofMinutes(50));
+
+        Epic epic = new Epic(TaskType.EPIC, "Epic", Status.NEW, "Description epic");
+
         Subtask subtask = new Subtask(TaskType.SUBTASK, "Subtask", Status.IN_PROGRESS, "Description subtask", epic);
+        subtask.setStartTime(LocalDateTime.of(2026, 6, 15, 12, 0,0));
+        subtask.setDuration(Duration.ofMinutes(10));
+
+        epic.addSubtask(subtask);
+
         fileBackedTaskManager.createTask(task);
-        fileBackedTaskManager.createTask(epic);
-        fileBackedTaskManager.createTask(subtask);
+        fileBackedTaskManager.createEpic(epic);
+        fileBackedTaskManager.createSubtask(subtask);
 
         bufferedReader.readLine();
 
@@ -48,27 +60,42 @@ class FileBackedTaskManagerTest {
             tasks.add(line);
         }
 
-        assertEquals(tasks.getFirst(), "0,TASK,Task,NEW,Description task");
-        assertEquals(tasks.get(1), "1,EPIC,Epic,DONE,Description epic");
-        assertEquals(tasks.getLast(), "2,SUBTASK,Subtask,IN_PROGRESS,Description subtask,1");
+        assertEquals(tasks.getFirst(), "0,TASK,Task,NEW,Description task,2025-06-15 00:00:00,50");
+        assertEquals(tasks.get(1), "1,EPIC,Epic,NEW,Description epic,2026-06-15 12:00:00,10");
+        assertEquals(tasks.getLast(), "2,SUBTASK,Subtask,IN_PROGRESS,Description subtask,2026-06-15 12:00:00,10,1");
 
         bufferedReader.close();
     }
 
     /**
-     * This test covered loadFromFile() and fromString() methods in FileBackedTaskManager
-     * **/
+     * This test covers loadFromFile() and fromString() methods in FileBackedTaskManager
+     * @see FileBackedTaskManager#loadFromFile(File) 
+     * @see FileBackedTaskManager#fromString(String)
+     * @throws IOException
+     **/
     @Test
     void loadFromFileTest() throws IOException {
         File testBackup = new File("./test/resources/file/backup.csv");
         fileBackedTaskManager = FileBackedTaskManager.loadFromFile(testBackup);
 
-        Task testTask = new Task(0,TaskType.TASK, "Task", Status.NEW, "Description task");
-        Epic testEpic = new Epic(1,TaskType.EPIC, "Epic", Status.DONE, "Description epic");
+        Task testTask = new Task(0, TaskType.TASK, "Task", Status.NEW, "Description task");
+        testTask.setStartTime(LocalDateTime.of(2025, 6, 15, 0, 0, 0));
+        testTask.setDuration(Duration.ofMinutes(50));
+
+        Epic testEpic = new Epic(1, TaskType.EPIC, "Epic", Status.IN_PROGRESS, "Description epic");
+
         Subtask testSubtask = new Subtask(2,TaskType.SUBTASK,
                                             "Subtask",
                                             Status.IN_PROGRESS,
                                             "Description subtask", testEpic);
+        testSubtask.setStartTime(LocalDateTime.of(2026, 6, 15, 12, 0,0));
+        testSubtask.setDuration(Duration.ofMinutes(10));
+
+        testEpic.addSubtask(testSubtask);
+
+        fileBackedTaskManager.createTask(testTask);
+        fileBackedTaskManager.createEpic(testEpic);
+        fileBackedTaskManager.createSubtask(testSubtask);
 
         assertEquals(fileBackedTaskManager.getTaskById(0),testTask);
         assertEquals(fileBackedTaskManager.getEpicById(1),testEpic);

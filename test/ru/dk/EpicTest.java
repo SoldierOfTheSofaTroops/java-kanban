@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EpicTest {
 
     private Epic epic1;
-    private Epic epic2;
+    private Epic epic2;;
 
     @BeforeEach
     void setUp() {
@@ -21,10 +21,5 @@ class EpicTest {
     void testEquals() {
         epic2.setId(epic1.getId());
         assertEquals(epic1, epic2, "Epics are not equal");
-    }
-
-    @Test
-    public void addSubtaskTest() {
-
     }
 }
