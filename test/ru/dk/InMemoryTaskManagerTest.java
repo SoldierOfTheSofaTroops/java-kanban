@@ -2,102 +2,154 @@ package ru.dk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.dk.abstracts.TaskManager;
+import ru.dk.core.Managers;
 import ru.dk.core.impl.InMemoryTaskManager;
 import ru.dk.core.type.Status;
+import ru.dk.core.type.TaskType;
 import ru.dk.entity.Epic;
 import ru.dk.entity.Subtask;
 import ru.dk.entity.Task;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
-
-    private TaskManager taskManager;
+    InMemoryTaskManager taskManager;
 
     @BeforeEach
-    void setUp() {
-        taskManager = new InMemoryTaskManager();
+    public void setUp() throws Exception {
+        taskManager = (InMemoryTaskManager) Managers.getDefault();
     }
 
     @Test
-    void createTask() {
-        Task task = new Task("Task description", "Task name");
-        taskManager.createTask(task);
-        final int taskId = taskManager.getTaskById(0).getId();
-        Task savedTask = taskManager.getTaskById(taskId);
-        assertNotNull(savedTask, "Task not found");
-        assertEquals(task, savedTask, "Tasks not equal");
+    public void getPrioritizedTasks(){
+        Task testTask0 = new Task(0, TaskType.TASK, "Test task-0 description", Status.NEW, "Test task-0 name");
+        testTask0.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,0));
+        testTask0.setDuration(Duration.ofMinutes(5));
+        Task testTask1 = new Task(1, TaskType.TASK, "Test task-1 description", Status.NEW, "Test task-1 name");
+        testTask1.setStartTime(LocalDateTime.of(2025, 6, 15, 0,6,0));
+        testTask1.setDuration(Duration.ofMinutes(5));
+        Task testTask2 = new Task(2, TaskType.TASK, "Test task-2 description", Status.NEW, "Test task-2 name");
+        testTask2.setStartTime(LocalDateTime.of(2025, 6, 15, 0,12,0));
+        testTask2.setDuration(Duration.ofMinutes(5));
+        Task testTask3 = new Task(3, TaskType.TASK, "Test task-3 description", Status.NEW, "Test task-3 name");
+        testTask3.setStartTime(LocalDateTime.of(2025, 6, 15, 0,18,0));
+        testTask3.setDuration(Duration.ofMinutes(5));
+        Task testTask4 = new Task(4, TaskType.TASK, "Test task-4 description", Status.NEW, "Test task-4 name");
+        testTask4.setStartTime(LocalDateTime.of(2025, 6, 15, 0,24,0));
+        testTask4.setDuration(Duration.ofMinutes(5));
+
+        Subtask testSubtask5 = new Subtask(5, TaskType.SUBTASK, "Test subtask-5 description", Status.NEW, "Test subtask-5 name");
+        testSubtask5.setStartTime(LocalDateTime.of(2025, 6, 15, 0,30,5));
+        Subtask testSubtask6 = new Subtask(6, TaskType.SUBTASK, "Test subtask-6 description", Status.NEW, "Test subtask-6 name");
+        testSubtask6.setStartTime(LocalDateTime.of(2025, 6, 15, 0,36,6));
+        Subtask testSubtask7 = new Subtask(7, TaskType.SUBTASK, "Test subtask-7 description", Status.NEW, "Test subtask-7 name");
+        testSubtask7.setStartTime(LocalDateTime.of(2025, 6, 15, 0,42,7));
+        Subtask testSubtask8 = new Subtask(8, TaskType.SUBTASK, "Test subtask-8 description", Status.NEW, "Test subtask-8 name");
+        testSubtask8.setStartTime(LocalDateTime.of(2025, 6, 15, 0,48,8));
+        Subtask testSubtask9 = new Subtask(9, TaskType.SUBTASK, "Test subtask-9 description", Status.NEW, "Test subtask-9 name");
+        testSubtask9.setStartTime(LocalDateTime.of(2025, 6, 15, 0,54,9));
+        Subtask testSubtask10 = new Subtask(10, TaskType.SUBTASK, "Test subtask-10 description", Status.NEW, "Test subtask-10 name");
+        testSubtask10.setStartTime(LocalDateTime.of(2025, 6, 15, 0,59,10));
+        testSubtask5.setDuration(Duration.ofMinutes(5));
+        testSubtask6.setDuration(Duration.ofMinutes(5));
+        testSubtask7.setDuration(Duration.ofMinutes(5));
+        testSubtask8.setDuration(Duration.ofMinutes(5));
+        testSubtask9.setDuration(Duration.ofMinutes(5));
+        testSubtask10.setDuration(Duration.ofMinutes(5));
+        Epic testEpic11 = new Epic(11, TaskType.EPIC, "Test epic 11 description", Status.NEW, "Test epic 11 name");
+
+        testEpic11.addSubtask(testSubtask5);
+        testEpic11.addSubtask(testSubtask6);
+        testEpic11.addSubtask(testSubtask7);
+        testEpic11.addSubtask(testSubtask8);
+        testEpic11.addSubtask(testSubtask9);
+        testEpic11.addSubtask(testSubtask10);
+
+        taskManager.createTask(testTask0);
+        taskManager.createTask(testTask1);
+        taskManager.createTask(testTask2);
+        taskManager.createTask(testTask3);
+        taskManager.createTask(testTask4);
+        taskManager.createSubtask(testSubtask5);
+        taskManager.createSubtask(testSubtask6);
+        taskManager.createSubtask(testSubtask7);
+        taskManager.createSubtask(testSubtask8);
+        taskManager.createSubtask(testSubtask9);
+        taskManager.createSubtask(testSubtask10);
+        taskManager.createEpic(testEpic11);
+
+        TreeSet<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(testTask0, prioritizedTasks.first());
+        assertEquals(testSubtask10, prioritizedTasks.last());
     }
 
     @Test
-    void createEpic() {
-        Epic epic = new Epic("Epic description", "Epic name");
-        taskManager.createEpic(epic);
-        final int epicId = taskManager.getEpicById(0).getId();
-        Epic savedEpic = (Epic) taskManager.getEpicById(epicId);
-        assertNotNull(savedEpic, "Epic not found");
-        assertEquals(epic, savedEpic, "Epics not equal");
+    public void setEpicStartEndTimeAndDuration(){
+        Subtask testSubtask5 = new Subtask(5, TaskType.SUBTASK, "Test subtask-5 description", Status.NEW, "Test subtask-5 name");
+        testSubtask5.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,5));
+        Subtask testSubtask6 = new Subtask(6, TaskType.SUBTASK, "Test subtask-6 description", Status.NEW, "Test subtask-6 name");
+        testSubtask6.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,6));
+        Subtask testSubtask7 = new Subtask(7, TaskType.SUBTASK, "Test subtask-7 description", Status.NEW, "Test subtask-7 name");
+        testSubtask7.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,7));
+        Subtask testSubtask8 = new Subtask(8, TaskType.SUBTASK, "Test subtask-8 description", Status.NEW, "Test subtask-8 name");
+        testSubtask8.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,8));
+        Subtask testSubtask9 = new Subtask(9, TaskType.SUBTASK, "Test subtask-9 description", Status.NEW, "Test subtask-9 name");
+        testSubtask9.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,9));
+        Subtask testSubtask10 = new Subtask(10, TaskType.SUBTASK, "Test subtask-10 description", Status.NEW, "Test subtask-10 name");
+        testSubtask10.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,10));
+        testSubtask5.setDuration(Duration.ofMinutes(10));
+        testSubtask6.setDuration(Duration.ofMinutes(10));
+        testSubtask7.setDuration(Duration.ofMinutes(10));
+        testSubtask8.setDuration(Duration.ofMinutes(10));
+        testSubtask9.setDuration(Duration.ofMinutes(10));
+        testSubtask10.setDuration(Duration.ofMinutes(9));
+        Epic testEpic11 = new Epic(11, TaskType.EPIC, "Test epic 11 description", Status.NEW, "Test epic 11 name");
+
+        testEpic11.addSubtask(testSubtask5);
+        testEpic11.addSubtask(testSubtask6);
+        testEpic11.addSubtask(testSubtask7);
+        testEpic11.addSubtask(testSubtask8);
+        testEpic11.addSubtask(testSubtask9);
+        testEpic11.addSubtask(testSubtask10);
+
+        taskManager.createEpic(testEpic11);
+
+        assertEquals(Duration.ofMinutes(59), testEpic11.getDuration());
+        assertEquals(LocalDateTime.of(2025, 6, 15, 0,0,5), testEpic11.getStartTime());
+        assertEquals(LocalDateTime.of(2025, 6, 15, 0,9,10), testEpic11.getEndTime());
     }
 
     @Test
-    void createSubtask() {
-        Subtask subtask = new Subtask("Subtask description", "Subtask name");
-        taskManager.createSubtask(subtask);
-        final int subtaskId = taskManager.getSubtaskById(0).getId();
-        Subtask savedSubtask = (Subtask) taskManager.getSubtaskById(subtaskId);
-        assertNotNull(savedSubtask, "Subtask not found");
-        assertEquals(subtask, savedSubtask, "Subtasks not equal");
-    }
+    public void isTasksOverlap(){
+        Task testTask0 = new Task(0, TaskType.TASK, "Test task-0 description", Status.NEW, "Test task-0 name");
+        testTask0.setStartTime(LocalDateTime.of(2025, 6, 15, 0,0,0));
+        testTask0.setDuration(Duration.ofMinutes(9));
 
-    @Test
-    void taskManagerCanAddAllTypeTasksAndCanFindById(){
-        assertDoesNotThrow(() -> taskManager.createTask(new Task("Task description", "Task name")));
-        assertDoesNotThrow(() -> taskManager.createEpic(new Epic("Epic description", "Epic name")));
-        assertDoesNotThrow(() -> taskManager.createSubtask(new Subtask("Subtask description", "Subtask name")));
-        assertNotNull(taskManager.getTaskById(0), "Task not found");
-        assertNotNull(taskManager.getEpicById(1), "Epic not found");
-        assertNotNull(taskManager.getSubtaskById(2), "Subtask not found");
-        taskManager.createTask(new Epic("Description for test epic", "Test epic"));
-    }
+        Task testTask1 = new Task(1, TaskType.TASK, "Test task-1 description", Status.NEW, "Test task-1 name");
+        testTask1.setStartTime(LocalDateTime.of(2025, 6, 15, 0,23,1));
+        testTask1.setDuration(Duration.ofMinutes(10));
 
-    @Test
-    void idConflictTest(){
-        Task task1 = new Task("Task description", "Task name");
-        Task task2 = new Task("Task description", "Task name");
-        task2.setId(0);
-        assertDoesNotThrow(() -> taskManager.createTask(task1), "An error occurred while creating task");
-        assertDoesNotThrow(() -> taskManager.createTask(task2), "An error occurred while creating task");
-    }
+        Task testTask2 = new Task(2, TaskType.TASK, "Test task-2 description", Status.NEW, "Test task-2 name");
+        testTask2.setStartTime(LocalDateTime.of(2025, 6, 15, 0,22,2));
+        testTask2.setDuration(Duration.ofMinutes(10));
 
-    @Test
-    void immutabilityOfTheTaskTest(){
-        Task task1 = new Task("Task description", "Task name");
+        Task testTask3 = new Task(3, TaskType.TASK, "Test task-3 description", Status.NEW, "Test task-3 name");
+        testTask3.setStartTime(LocalDateTime.of(2025, 6, 15, 0,33,3));
+        testTask3.setDuration(Duration.ofMinutes(10));
 
-        task1.setStatus(Status.IN_PROGRESS);
-        taskManager.createTask(task1);
-        assertEquals(task1.getDescription(), taskManager.getTaskById(0).getDescription(), "Task description not equal");
-        assertEquals(task1.getName(), taskManager.getTaskById(0).getName(), "Task name not equal");
-        assertEquals(task1.getStatus(), taskManager.getTaskById(0).getStatus(), "Task status not equal");
+        Task testTask4 = new Task(4, TaskType.TASK, "Test task-4 description", Status.NEW, "Test task-4 name");
+        testTask4.setStartTime(LocalDateTime.of(2025, 6, 15, 0,44,3));
+        testTask4.setDuration(Duration.ofMinutes(10));
 
-        Epic epic = new Epic("Epic description", "Epic name");
-        taskManager.createEpic(epic);
-        assertEquals(epic.getDescription(), taskManager.getEpicById(1).getDescription(), "Epic description not equal");
-        assertEquals(epic.getName(), taskManager.getEpicById(1).getName(), "Epic name not equal");
-        assertEquals(epic.getStatus(), taskManager.getEpicById(1).getStatus(), "Epic status not equal");
+        taskManager.createTask(testTask2);
+        taskManager.createTask(testTask3);
+        taskManager.createTask(testTask4);
 
-        Subtask subtask = new Subtask("Subtask description", "Subtask name");
-        taskManager.createSubtask(subtask);
-        assertEquals(subtask.getDescription(), taskManager.getSubtaskById(2).getDescription(), "Subtask description not equal");
-        assertEquals(subtask.getName(), taskManager.getSubtaskById(2).getName(), "Subtask name not equal");
-        assertEquals(subtask.getStatus(), taskManager.getSubtaskById(2).getStatus(), "Subtask status not equal");
-    }
-
-    @Test
-    void getHistory(){
-        ArrayList<Task> history = taskManager.getHistory();
-        assertNotNull(history, "Returned history is null");
+        assertFalse(taskManager.isTasksOverlap(testTask0));
+        assertTrue(taskManager.isTasksOverlap(testTask1));
     }
 }

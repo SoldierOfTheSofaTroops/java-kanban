@@ -9,6 +9,10 @@ import ru.dk.entity.Subtask;
 import ru.dk.entity.Task;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
@@ -22,7 +26,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     /**
-     * This method loads string representation Tasks (Epic, Subtasks) from backup.csv file, then converts them to objects.
+     * This method loads string representation Tasks (Epic, Subtasks) from backup.csv file,
+     * then converts them to objects.
      * After that restores links between Epics and Subtasks.
      * @throws IOException if errors occur during the reading process from the file
      * @throws ManagerSaveException if errors occur during the reading process from the file
@@ -75,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     /**
-     * This method save current status of the manager.
+     * This method saves current status of the manager.
      * It uses toString() method which is in this class
      * @throws IOException if errors occur during the writing process to the file
      * @throws ManagerSaveException if errors occur during the writing process to the file
@@ -87,7 +92,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         BufferedWriter bw;
         try {
             bw = new BufferedWriter(new FileWriter(backup));
-            bw.write("id,type,name,status,description,epic\n");
+            //write head of table
+            bw.write("id,type,name,status,description,startTime,duration,epic\n");
             if (!getAllTasks().isEmpty()){
                 for (Task task : getAllTasks()) {
                     try {
@@ -240,18 +246,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
     /**
      * This method returns string representation of the Task (Epic, Subtask).
-     * It's use for save tasks (epics, subtasks) to backup.csv file.
+     * It's use for save tasks (epics, subtasks) to back up csv file.
      * @param task Task, Epic or Subtask which needs to be saved
      * @see FileBackedTaskManager#save()
      * @since Sprint-7
      * **/
     private String toString(Task task){
-        StringBuilder result = new StringBuilder(String.format("%d,%s,%s,%s,%s",
+        StringBuilder result = new StringBuilder(String.format("%d,%s,%s,%s,%s,%s,%d",
                                                         task.getId(),
                                                         task.getType(),
                                                         task.getName(),
                                                         task.getStatus(),
-                                                        task.getDescription()));
+                                                        task.getDescription(),
+                                                        task.getStartTime()
+                                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                                                        task.getDuration().toMinutes()));
         if (task.getType().equals(TaskType.TASK)
                 || task.getType().equals(TaskType.EPIC)){
                     return result.toString();
@@ -275,23 +284,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
           String name = parsedString[2];
           Status status = Status.valueOf(parsedString[3]);
           String description = parsedString[4];
+          LocalDateTime startTime = LocalDateTime.parse(parsedString[5], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+          Duration duration = Duration.of(Long.parseLong(parsedString[6]), ChronoUnit.MINUTES);
           Task restoredObject = null;
 
           try{
               if (type.equals(TaskType.SUBTASK)){
-                  int epicId = Integer.parseInt(parsedString[5]);
+                  int epicId = Integer.parseInt(parsedString[7]);
                   FileBackedTaskManager.linksBetweenSubtasksAndEpics.put(id, epicId);
                   restoredObject = new Subtask (id, type, name, status, description);
+                  restoredObject.setStartTime(startTime);
+                  restoredObject.setDuration(duration);
               } else if (type.equals(TaskType.EPIC)) {
                   restoredObject = new Epic(id, type, name, status, description);
+                  restoredObject.setStartTime(LocalDateTime.now());
+                  restoredObject.setDuration(Duration.ZERO);
               } else {
                   restoredObject = new Task(id, type, name, status, description);
+                  restoredObject.setStartTime(startTime);
+                  restoredObject.setDuration(duration);
               }
           } catch (ClassCastException exception){
               exception.printStackTrace();
           }
           return restoredObject;
     }
-
-
 }

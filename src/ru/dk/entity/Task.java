@@ -3,14 +3,18 @@ package ru.dk.entity;
 import ru.dk.core.type.Status;
 import ru.dk.core.type.TaskType;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Task implements Cloneable {
+public class Task implements Cloneable, Comparable<Task> {
     private int id;
     private String description;
     private String name;
     private Status status;
     private TaskType type;
+    private Duration duration;
+    private LocalDateTime startTime;
 
     public Task(String description, String name) {
         this.description = description;
@@ -19,7 +23,7 @@ public class Task implements Cloneable {
         this.type = TaskType.TASK;
     }
 
-    public Task(TaskType type, String name, Status status,String description) {
+    public Task(TaskType type, String name, Status status, String description) {
         this.description = description;
         this.name = name;
         this.type = type;
@@ -32,6 +36,16 @@ public class Task implements Cloneable {
         this.name = name;
         this.status = status;
         this.type = type;
+    }
+
+    public Task(int id, String description, String name, Status status, TaskType type, LocalDateTime startTime, Duration duration) {
+        this.id = id;
+        this.description = description;
+        this.name = name;
+        this.status = status;
+        this.type = type;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public int getId() {
@@ -74,6 +88,30 @@ public class Task implements Cloneable {
         this.type = type;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * This method returns an end time (LocalDateTime) for task and subtask
+     * @since Sprint-8
+     **/
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,6 +140,15 @@ public class Task implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    @Override
+    public int compareTo(Task o) {
+        if (this.startTime.isAfter(o.getStartTime())){
+            return 1;
+        } else if (this.startTime.isBefore(o.getStartTime())){
+            return -1;
+        } else return 0;
     }
 }
 
