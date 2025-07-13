@@ -137,7 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task getTaskById(int id){
         Task task = tasks.get(id);
         historyManager.add(task);
-        return tasks.get(id);
+        return task;
     }
 
     @Override
@@ -156,7 +156,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task){
-        if (isTasksOverlap(task)){
+        if (!isTasksOverlap(task)){
             tasks.put(task.getId(), task);
             if (task.getStartTime() != null){
                 prioritizedTasks.add(task);
