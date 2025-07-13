@@ -38,6 +38,15 @@ public class Task implements Cloneable, Comparable<Task> {
         this.type = type;
     }
 
+    public Task(String description, String name, Status status, TaskType type, LocalDateTime startTime, Duration duration) {
+        this.description = description;
+        this.name = name;
+        this.status = status;
+        this.type = type;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
     public Task(int id, String description, String name, Status status, TaskType type, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.description = description;
@@ -47,6 +56,8 @@ public class Task implements Cloneable, Comparable<Task> {
         this.startTime = startTime;
         this.duration = duration;
     }
+
+
 
     public int getId() {
         return id;
@@ -130,7 +141,10 @@ public class Task implements Cloneable, Comparable<Task> {
                 + "\tID: " + this.id + "\n"
                 + "\tName: " + this.name + "\n"
                 + "\tDescription: " + this.description + "\n"
-                + "\tStatus: " + this.status + "\n";
+                + "\tStatus: " + this.status + "\n"
+                + "\tStart time: " + this.startTime + "\n"
+                + "\tDuration: " + this.duration + "\n"
+                + "\tEnd time: " + this.getEndTime() + "\n";
     }
 
     @Override
